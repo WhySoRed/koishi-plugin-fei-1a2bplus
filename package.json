@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-fei-1a2bplus",
   "description": "可更改设置的1A2B!",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -9,14 +9,21 @@
     "dist"
   ],
   "license": "MIT",
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
     "plugin"
   ],
-  "devDependencies": {},
   "peerDependencies": {
     "koishi": "^4.17.4"
+  },
+  "homepage": "https://github.com/WhySoRed/koishi-plugin-fei-1a2bplus",
+  "koishi": {
+    "description": {
+      "zh": "来玩1A2B+吧！"
+    },
+    "locales": [
+      "zh"
+    ]
   }
 }
