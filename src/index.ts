@@ -49,7 +49,7 @@ export function apply(ctx: Context) {
 
         _.session.send('这里是...' + welcome)
         .then(() => _.session.send(`
-1A2BPlus v1.0.1
+1A2BPlus v1.0.2
 =========================
 ✄指令列表：
 1a2b+开始

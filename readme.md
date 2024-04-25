@@ -37,4 +37,4 @@
 
  - [现代 JavaScript 教程](https://zh.javascript.info/)
  - [Koishi开发指南](https://koishi.chat/zh-CN/guide/)
- - smm和群里的几位的帮助
+ - smm和群里的几位劳斯的帮助

@@ -118,7 +118,6 @@ export class ABPlusTemp {
     }
 
     //将配置拼接为字符串（用来做配置排行榜） 如标准模式（字符数量10长度4）会被拼接为"1004falsefalsefalse"
-    //好吧其实config里也有个getter其实这个好像没用了...留着吧万一呢
     async session2configText(session: any):Promise<string> {
         const config:ABPlusSingleConfig = await this.getConfig(session);
         const configText:string = await this.config2configText(config);
@@ -415,7 +414,7 @@ export class ABPlusRank {
         if(returnRank.length === 0 )return `当前配置的${isFreq? '次数':'时间'}排行榜上还没有玩家...`
         else {
             for(const i in returnRank) {
-                rankText += `${(+i + 1).toString().padStart(2,'0')}. ${returnRank[i].score}${isFreq? '次':'秒'} ${allUserData.getNameById(returnRank[i].userId)} ${returnRank[i].scoreDate}\n`
+                rankText += `${(+i + 1).toString().padStart(2,'0')}. ${returnRank[i].score}${isFreq? '次':'秒'} ${await allUserData.getNameById(returnRank[i].userId)} ${returnRank[i].scoreDate}\n`
             }
         }
         return rankText;
@@ -431,7 +430,7 @@ export class ABPlusRank {
         if(returnRank.length === 0 )return `${(configText === '1004falsefalsefalse')?'标准模式':'这一配置'}的${isFreq? '次数':'时间'}排行榜上还没有玩家...`
         else {
             for(const i in returnRank) {
-                rankText += `${(+i + 1).toString().padStart(2,'0')}. ${returnRank[i].score}${isFreq? '次':'秒'} ${allUserData.getNameById(returnRank[i].userId)} ${returnRank[i].scoreDate}\n`
+                rankText += `${(+i + 1).toString().padStart(2,'0')}. ${returnRank[i].score}${isFreq? '次':'秒'} ${await allUserData.getNameById(returnRank[i].userId)} ${returnRank[i].scoreDate}\n`
             }
         }
         return rankText;
