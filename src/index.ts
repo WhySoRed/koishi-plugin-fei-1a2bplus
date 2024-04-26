@@ -49,7 +49,7 @@ export function apply(ctx: Context) {
 
         _.session.send('这里是...' + welcome)
         .then(() => _.session.send(`
-1A2BPlus v1.0.3
+1A2BPlus v1.0.4
 =========================
 ✄指令列表：
 1a2b+开始
@@ -95,29 +95,39 @@ export function apply(ctx: Context) {
 
     ctx.command('1a2b是什么', { hidden: true })
     .action(async(_) => {
-        _.session.send(`
+        await _.session.send(`
 ===================
 1A2B是一种简单的猜数字游戏
 我会偷偷决定好数字和顺序
 你则要猜出它是什么
-每轮猜测后，我会给你一个xAxB的提示
-`).then(()=> _.session.send(`
+当然不会是瞎猜 每轮猜测后
+我会给你一个xAxB的提示
+`).then(async ()=> {
+await ctx.sleep(1000);
+await _.session.send(`
 A前的数字代表
  数字对位置也对
 B前的数字表示
  数字对位置不对
-`)).then(()=> _.session.send(`
+`)
+}).then(async ()=> {
+await ctx.sleep(500);
+await _.session.send(`
 例如
 答案是4567
 猜测输入4571
 我就会给出2A1B的结果
 4和5完全正确 所以是2A
 7的位置不对 所以是1B
-`)).then(()=> _.session.send(`
+`)
+}).then(async ()=> {
+await ctx.sleep(500);
+await _.session.send(`
 想要猜到答案有很多种方法
 快来试试看吧~
 ===================
-`))
+`)
+})
     })
 
     ctx.command('1a2b\+开始', { hidden: true })
@@ -737,6 +747,7 @@ help 1a2b+设置.愚人模式
                 else session.send(checkResult.reason);
             }
         }
+        else next();
     })
     //对猜测输入进行检测
     async function abPlusCheck(session:any,message:string){
