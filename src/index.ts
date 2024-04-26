@@ -49,7 +49,7 @@ export function apply(ctx: Context) {
 
         _.session.send('这里是...' + welcome)
         .then(() => _.session.send(`
-1A2BPlus v1.0.2
+1A2BPlus v1.0.3
 =========================
 ✄指令列表：
 1a2b+开始
@@ -94,18 +94,30 @@ export function apply(ctx: Context) {
     }
 
     ctx.command('1a2b是什么', { hidden: true })
-    .action((_) => {
-        return `
-1A2B是一种规则十分简单的猜数字游戏~
-你要猜出随机生成的答案是什么
-而每次猜测都会给你提示，
-A前的数字代表“这个数目的数字在答案里存在并且在他们该在的位置上！”
-B前的数字表示“这个数目的数字在答案里存在但不在他们该在的位置上！”
-例如答案是4567 猜测输入4571，会给出2A1B的结果
-4和5完全正确，所以是2A
-7在答案中，但是位置不对，所以是1B
-想要猜到答案有很多种方法，快来试试看吧
-`
+    .action(async(_) => {
+        _.session.send(`
+===================
+1A2B是一种简单的猜数字游戏
+我会偷偷决定好数字和顺序
+你则要猜出它是什么
+每轮猜测后，我会给你一个xAxB的提示
+`).then(()=> _.session.send(`
+A前的数字代表
+ 数字对位置也对
+B前的数字表示
+ 数字对位置不对
+`)).then(()=> _.session.send(`
+例如
+答案是4567
+猜测输入4571
+我就会给出2A1B的结果
+4和5完全正确 所以是2A
+7的位置不对 所以是1B
+`)).then(()=> _.session.send(`
+想要猜到答案有很多种方法
+快来试试看吧~
+===================
+`))
     })
 
     ctx.command('1a2b\+开始', { hidden: true })
@@ -224,7 +236,7 @@ B前的数字表示“这个数目的数字在答案里存在但不在他们该�
     .alias('.1')
     .action(async ({ session }) => {
         const config = await abPlusTemp.getConfig(session);
-        return abPlusRank.showRank(config, abPlusUserData, true);
+        return await abPlusRank.showRank(config, abPlusUserData, true);
     })
     .usage('这里没有帮助阿')
 
@@ -232,21 +244,21 @@ B前的数字表示“这个数目的数字在答案里存在但不在他们该�
     .alias('.2')
     .action(async ({ session }) => {
         const config = await abPlusTemp.getConfig(session);
-        return abPlusRank.showRank(config, abPlusUserData, false);
+        return await abPlusRank.showRank(config, abPlusUserData, false);
     })
     .usage('写帮助好麻烦呀')
 
     ctx.command('1a2b\+排行榜.标准次数', { hidden: true })
     .alias('.标1', '.classic1', '.cl1')
     .action(async ({ session }) => {
-        return abPlusRank.showRankByConfigText('1004falsefalsefalse', abPlusUserData, true);
+        return await abPlusRank.showRankByConfigText('1004falsefalsefalse', abPlusUserData, true);
     })
     .usage('虽然叫标准模式但其实 .classic1 .cl1也行')
 
     ctx.command('1a2b\+排行榜.标准时间', { hidden: true })
     .alias('.标2', '.classic2,', '.cl2')
     .action(async ({ session }) => {
-        return abPlusRank.showRankByConfigText('1004falsefalsefalse', abPlusUserData, false);
+        return await abPlusRank.showRankByConfigText('1004falsefalsefalse', abPlusUserData, false);
     })
     .usage('虽然也叫标准模式但其实 .classic2 .cl2也行')
 
@@ -655,7 +667,7 @@ help 1a2b+设置.愚人模式
 
     ctx.command('1a2b\+设置.重置以上设置', { hidden: true })
     .action(async (_,message) => {
-        abPlusTemp.refreshConfig(_.session);
+        await abPlusTemp.refreshConfig(_.session);
     })
     .usage('重设猜测范围、猜测长度与所有模式')
 
@@ -808,8 +820,8 @@ help 1a2b+设置.愚人模式
                 returnText = await abPlusTemp.showHistory(session);
             }
         }
-        await abPlusTemp.setTimeout(session, ctx, ()=>{
-            abPlusTemp.clearStats(session);
+        await abPlusTemp.setTimeout(session, ctx, async ()=>{
+            await abPlusTemp.clearStats(session);
             session.send('五分钟没有任何人猜，游戏已自动结束~');
         },300000)
         return returnText;
@@ -843,7 +855,7 @@ help 1a2b+设置.愚人模式
             return guessAnswer;
         }
         else{
-            return abPlusShuffle(gPool).slice(0, config.guessLength);
+            return await abPlusShuffle(gPool).slice(0, config.guessLength);
         }
     }
     //游戏胜利 返回显示文本
@@ -857,7 +869,7 @@ help 1a2b+设置.愚人模式
         await abPlusRank.addRank(session, config, abPlusUserData, scoreFreq, scoreTime);
         await abPlusTemp.clearStats(session); 
 
-        return returnText + `\n${(stats.inGuild)? `猜中的人是${abPlusUserData.getNameById(session.event.user.id)}，大家一共`: '猜中啦，一共'}猜了${scoreFreq}次，用时${scoreTime}秒~`;
+        return returnText + `\n${(stats.inGuild)? `猜中的人是${await abPlusUserData.getNameById(session.event.user.id)}，大家一共`: '猜中啦，一共'}猜了${scoreFreq}次，用时${scoreTime}秒~`;
     }
 
     //Fisher-Yates洗牌算法

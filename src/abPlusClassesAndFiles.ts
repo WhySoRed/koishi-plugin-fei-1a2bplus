@@ -359,8 +359,8 @@ export class ABPlusRank {
         const personBest = await this.getPersonBest(session, config);
         const userId = encodeURIComponent(session.event.user.id);
         const scoreDate = new Date();
-        allUserData.setScore(session, scoreFreq, scoreTime);
-        allUserData.increaseUserData(session, 'winCount');
+        await allUserData.setScore(session, scoreFreq, scoreTime);
+        await allUserData.increaseUserData(session, 'winCount');
         const date = scoreDate.getFullYear().toString().slice(-2) + '.' + 
                      ('0' + (scoreDate.getMonth() + 1)).slice(-2) + '.' +
                      ('0' + (scoreDate.getDate() + 1)).slice(-2);
