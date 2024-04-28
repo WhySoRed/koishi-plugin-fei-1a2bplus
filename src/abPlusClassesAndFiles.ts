@@ -1,4 +1,4 @@
-import { Context } from 'koishi'
+import { Context, Session } from 'koishi'
 
 const fs = require("fs");
 const path = require('path');
@@ -40,7 +40,7 @@ export class ABPlusSingleGuess {
     userName: string;
     guessMessage: string;
     guessResult: any;
-    constructor(session: any, message: string, result: any) {
+    constructor(session: Session, message: string, result: any) {
         this.userId = session.userId;
         this.userName = session.event.user.name;
         this.guessMessage = message;
@@ -60,14 +60,14 @@ export class ABPlusTemp {
     statsList:StatsList = {};
     configList:ConfigList = {};
 
-    async getStats(session: any): Promise<ABPlusSingleStats> {
+    async getStats(session: Session): Promise<ABPlusSingleStats> {
         //如果不存在群聊/私聊数据则建立
         if(!this.statsList[encodeURIComponent(session.channelId)])
             this.statsList[encodeURIComponent(session.channelId)] = new ABPlusSingleStats(!session.event.channel.type);
         return this.statsList[encodeURIComponent(session.channelId)];
     }
 
-    async getConfig(session: any): Promise<ABPlusSingleConfig> {
+    async getConfig(session: Session): Promise<ABPlusSingleConfig> {
         // onebot的QQ群聊名称无法用session.guildName获得，只好稍微绕点弯用session.bot.getGuild()获得群聊名
         const channelName = session.event.channel.type ? session.event.user.name : (await session.bot.getGuild(session.guildId)).name;
         //如果不存在群聊/私聊数据则建立
@@ -81,7 +81,7 @@ export class ABPlusTemp {
         return this.configList[encodeURIComponent(session.channelId)];
     }
     //设定某一项配置
-    async setConfig(session: any, valueName: string, value: any) {
+    async setConfig(session: Session, valueName: string, value: any) {
         const config = await this.getConfig(session);
         const channelName = session.event.channel.type ? session.event.user.name : (await session.bot.getGuild(session.guildId)).name;
         config[valueName] = value;
@@ -90,7 +90,7 @@ export class ABPlusTemp {
         return this;
     }
     //重置某一项配置
-    async reSetConfig(session: any, valueName: string) {
+    async reSetConfig(session: Session, valueName: string) {
         const config = await this.getConfig(session);
         const channelName = session.event.channel.type? session.event.user.name: (await session.bot.getGuild(session.guildId)).name;
         config[valueName] = (new ABPlusSingleConfig(''))[valueName];
@@ -99,7 +99,7 @@ export class ABPlusTemp {
         return this;
     }
     //重置全部配置
-    async refreshConfig(session: any) {
+    async refreshConfig(session: Session) {
         const config = await this.getConfig(session);
         const channelName = session.event.channel.type? session.event.user.name: (await session.bot.getGuild(session.guildId)).name;
         Object.assign(config, new ABPlusSingleConfig[channelName]);
@@ -118,7 +118,7 @@ export class ABPlusTemp {
     }
 
     //将配置拼接为字符串（用来做配置排行榜） 如标准模式（字符数量10长度4）会被拼接为"1004falsefalsefalse"
-    async session2configText(session: any):Promise<string> {
+    async session2configText(session: Session):Promise<string> {
         const config:ABPlusSingleConfig = await this.getConfig(session);
         const configText:string = await this.config2configText(config);
         return configText;
@@ -142,13 +142,13 @@ export class ABPlusTemp {
         return configText;
     }
 
-    async addHistory(session: any, message: string, result: any) {
+    async addHistory(session: Session, message: string, result: any) {
         const stats = await this.getStats(session);
         stats.guessHistory.push(new ABPlusSingleGuess(session,message,result));
         return this;
     }
 
-    async showHistory(session: any): Promise<string> {
+    async showHistory(session: Session): Promise<string> {
         const history = (await this.getStats(session)).guessHistory;
         const config = await this.getConfig(session);
         let historyText:string = '本局猜测历史\n=================';
@@ -159,7 +159,7 @@ export class ABPlusTemp {
         return historyText;
     }
 
-    async clearStats(session: any) {
+    async clearStats(session: Session) {
         const stats = await this.getStats(session);
         stats.isPlaying = false;
         stats.guessHistory = [];
@@ -172,7 +172,7 @@ export class ABPlusTemp {
         this.statsList = {};
     }
     //每个channel专属的timer
-    async setTimeout(session: any, ctx: Context, callback: () => void, delay: number) {
+    async setTimeout(session: Session, ctx: Context, callback: () => void, delay: number) {
         const stats = await this.getStats(session);
         stats.guessTimer = ctx.setTimeout(callback,delay);
     }
@@ -227,7 +227,7 @@ class ABPlusSingleUserData {
 export class ABPlusUserData {
     userData = {};
 
-    async getUserData(session: any) {
+    async getUserData(session: Session) {
         //如果不存在用户数据则建立（其实好像不用encode来着...无所谓了反正没坏处
         if(!this.userData[encodeURIComponent(session.userId)]) {
             this.userData[encodeURIComponent(session.userId)] = new ABPlusSingleUserData(session.event.user.name);
@@ -241,14 +241,14 @@ export class ABPlusUserData {
         return this.userData[encodeURIComponent(session.userId)];
     }
     
-    async setUserData(session: any, valueName:string, value:number) {
+    async setUserData(session: Session, valueName:string, value:number) {
         const data = await this.getUserData(session);
         data[valueName] = value;
         await this.writeUserData();
         return this;
     }
 
-    async increaseUserData(session: any, valueName:string) {
+    async increaseUserData(session: Session, valueName:string) {
         const data = await this.getUserData(session);
         data[valueName]++;
         await this.writeUserData();
@@ -256,7 +256,7 @@ export class ABPlusUserData {
     }
     //为了避免出现恶性bug所以留了一个清空自己的数据的功能
     //嗯....用户自行设定的昵称说不定会有什么很不妙的东西呢...
-    async clearUserData(session: any) {
+    async clearUserData(session: Session) {
         const data = await this.getUserData(session);
         Object.assign(data,new ABPlusSingleUserData(''));
         await this.writeUserData();
@@ -274,7 +274,7 @@ export class ABPlusUserData {
     }
 
     //用户设定自己的昵称
-    async setName(session: any, nickName: string) {
+    async setName(session: Session, nickName: string) {
         const data = await this.getUserData(session);
         data.nickName = nickName;
         data.nickNameBeSet = true;
@@ -282,7 +282,7 @@ export class ABPlusUserData {
         return nickName;
     }
 
-    async getName(session: any) {
+    async getName(session: Session) {
         const data = await this.getUserData(session);
         return data.nickName;
     }
@@ -295,7 +295,7 @@ export class ABPlusUserData {
         return data.nickName;
     }
 
-    async setScore(session: any, scoreFreq:number, scoreTime: number) {
+    async setScore(session: Session, scoreFreq:number, scoreTime: number) {
         const data = await this.getUserData(session);
         data.score = [scoreFreq, scoreTime];
         await this.writeUserData();
@@ -346,7 +346,7 @@ export class ABPlusRank {
         return this.configRank[configText];
     }
 
-    async getPersonBest(session: any, config:ABPlusSingleConfig) {
+    async getPersonBest(session: Session, config:ABPlusSingleConfig) {
         const rank = await this.getRank(config);
         const userId = encodeURIComponent(session.event.user.id);
         if(!rank.personBestList[userId])
@@ -354,7 +354,7 @@ export class ABPlusRank {
         return rank.personBestList[userId];
     }
 
-    async addRank(session: any, config:ABPlusSingleConfig, allUserData: ABPlusUserData,scoreFreq:number,scoreTime:number) {
+    async addRank(session: Session, config:ABPlusSingleConfig, allUserData: ABPlusUserData,scoreFreq:number,scoreTime:number) {
         const rank:ABPlusSingleRank = await this.getRank(config);
         const personBest = await this.getPersonBest(session, config);
         const userId = encodeURIComponent(session.event.user.id);

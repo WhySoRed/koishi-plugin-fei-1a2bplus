@@ -1,10 +1,6 @@
 "use strict";
-import { Context, Schema, h } from 'koishi';
+import { Context, Schema, h, Session } from 'koishi';
 import {} from '@koishijs/plugin-help';
-
-import { pathToFileURL } from 'url';
-import{ resolve } from 'path';
-import { ABPlusSingleConfig } from './abPlusClassesAndFiles';
 
 export const name = 'fei-1a2b-test';
 const abCF = require('./abPlusClassesAndFiles')
@@ -38,17 +34,17 @@ export function apply(ctx: Context) {
     })
 
     ctx.command('1a2b\+','来玩1A2B\+吧！')
-    .action(async (_) =>{
+    .action(async ({ session }) =>{
         let welcome: any;
-        const config = await abPlusTemp.getConfig(_.session);
+        const config = await abPlusTemp.getConfig(session);
 
         if(config.modeStupid) welcome = h('img', { src: 'https://s21.ax1x.com/2024/04/23/pk9cKVP.png' }) + '1A2B+...吧？';
         else if(config.modeC) welcome = h('img', { src: 'https://s21.ax1x.com/2024/04/23/pk9cmDI.png' }) + '1A2BC☆';
         else if(config.modeDuplicate) welcome = h('img', { src: 'https://s21.ax1x.com/2024/04/25/pkCx83D.png' }) + '1A2B1A2B+☆';
         else welcome = h('img', { src: 'https://s21.ax1x.com/2024/04/22/pk9FRAA.png' }) + '1A2B+☆';
 
-        _.session.send('这里是...' + welcome)
-        .then(() => _.session.send(`
+        session.send('这里是...' + welcome)
+        .then(() => session.send(`
 1A2BPlus v1.0.4
 =========================
 ✄指令列表：
@@ -94,8 +90,8 @@ export function apply(ctx: Context) {
     }
 
     ctx.command('1a2b是什么', { hidden: true })
-    .action(async(_) => {
-        await _.session.send(`
+    .action(async({ session }) => {
+        await session.send(`
 ===================
 1A2B是一种简单的猜数字游戏
 我会偷偷决定好数字和顺序
@@ -104,7 +100,7 @@ export function apply(ctx: Context) {
 我会给你一个xAxB的提示
 `).then(async ()=> {
 await ctx.sleep(1000);
-await _.session.send(`
+await session.send(`
 A前的数字代表
  数字对位置也对
 B前的数字表示
@@ -112,7 +108,7 @@ B前的数字表示
 `)
 }).then(async ()=> {
 await ctx.sleep(500);
-await _.session.send(`
+await session.send(`
 例如
 答案是4567
 猜测输入4571
@@ -122,7 +118,7 @@ await _.session.send(`
 `)
 }).then(async ()=> {
 await ctx.sleep(500);
-await _.session.send(`
+await session.send(`
 想要猜到答案有很多种方法
 快来试试看吧~
 ===================
@@ -132,9 +128,9 @@ await _.session.send(`
 
     ctx.command('1a2b\+开始', { hidden: true })
     .alias('abps')
-    .action(async (_) =>{
-        const stats = await abPlusTemp.getStats(_.session);
-        const config = await abPlusTemp.getConfig(_.session);
+    .action(async ({ session }) =>{
+        const stats = await abPlusTemp.getStats(session);
+        const config = await abPlusTemp.getConfig(session);
         if(stats.isPlaying === true)
             return '已经有游戏正在进行中了的说...';
         stats.isPlaying = true;
@@ -274,18 +270,18 @@ await _.session.send(`
 
     ctx.command('1a2b\+排行榜.次数 <message>', { hidden: true })
     .alias('.c','.coumt')
-    .action(async (_) => {
+    .action(async ({ args, session }) => {
         let paramentCheckText:string;
-        if((paramentCheckText = await abPlusRankParameterCheck(_.args, true)) !== '')
+        if((paramentCheckText = await abPlusRankParameterCheck(args, true)) !== '')
             return paramentCheckText;
         else
             return await abPlusRank.showRankByConfigText(
                 await abPlusTemp.parameter2configText(
-                    _.args[0],
-                    _.args[1],
-                    (_.args[2] == '是'? true: false),
-                    (_.args[3] == '是'? true: false),
-                    (_.args[4] == '是'? true: false)
+                    args[0],
+                    args[1],
+                    (args[2] == '是'? true: false),
+                    (args[3] == '是'? true: false),
+                    (args[4] == '是'? true: false)
                 ),
                 abPlusUserData,
                 true
@@ -300,18 +296,18 @@ await _.session.send(`
 
     ctx.command('1a2b\+排行榜.时间 <message>', { hidden: true })
     .alias('.t','.time')
-    .action(async (_) => {
+    .action(async ({ args, session }) => {
         let paramentCheckText:string;
-        if((paramentCheckText = await abPlusRankParameterCheck(_.args, false)) !== '')
+        if((paramentCheckText = await abPlusRankParameterCheck(args, false)) !== '')
             return paramentCheckText;
         else {
             return await abPlusRank.showRankByConfigText(
                 await abPlusTemp.parameter2configText(
-                    _.args[0],
-                    _.args[1],
-                    (_.args[2] == '是'? true: false),
-                    (_.args[3] == '是'? true: false),
-                    (_.args[4] == '是'? true: false)
+                    args[0],
+                    args[1],
+                    (args[2] == '是'? true: false),
+                    (args[3] == '是'? true: false),
+                    (args[4] == '是'? true: false)
                 ),
                 abPlusUserData,
                 false
@@ -410,9 +406,9 @@ await _.session.send(`
 `)
 
     ctx.command('1a2b\+设置.猜测范围 <message:text>', { hidden: true })
-    .action(async (_, message) => {
-        const stats = await abPlusTemp.getStats(_.session);
-        const config = await abPlusTemp.getConfig(_.session);
+    .action(async ({ session }, message) => {
+        const stats = await abPlusTemp.getStats(session);
+        const config = await abPlusTemp.getConfig(session);
         if(stats.isPlaying) return '在游戏中不可以更改设置~';
 
         if(message === undefined) {
@@ -424,7 +420,7 @@ await _.session.send(`
                 config.guessPool = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
                 config.guessPoolDescribe = '0~9';
             }
-            await abPlusTemp.setConfig(_.session, 'guessLength', 4);
+            await abPlusTemp.setConfig(session, 'guessLength', 4);
             return '猜测范围已重置';
         }
 
@@ -446,9 +442,9 @@ await _.session.send(`
                 config.guessPool = guessPoolBase.slice(guessRangeStart, guessRangeEnd + 1);
                 config.guessPoolDescribe = '0~' + guessPoolBase[guessRangeEnd];
                 if(guessRangeEnd === 2)
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 3);
+                    await abPlusTemp.setConfig(session, 'guessLength', 3);
                 else 
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 4);
+                    await abPlusTemp.setConfig(session, 'guessLength', 4);
                 return '猜测范围已经设置为 ' + config.guessPoolDescribe + '\n猜测长度自动设置为 ' + config.guessLength;
             }
             //正常情况下输入了两个参数时
@@ -464,9 +460,9 @@ await _.session.send(`
                 config.guessPool = guessPoolBase.slice(guessRangeStart, guessRangeEnd + 1);
                 config.guessPoolDescribe = guessPoolBase[guessRangeStart] + '~' + guessPoolBase[guessRangeEnd];
                 if(guessRangeEnd - guessRangeStart === 2)
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 3);
+                    await abPlusTemp.setConfig(session, 'guessLength', 3);
                 else 
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 4);
+                    await abPlusTemp.setConfig(session, 'guessLength', 4);
                 return '猜测范围已经设置为 ' + config.guessPoolDescribe + '\n猜测长度自动设置为 ' + config.guessLength;
             }
             else if(guessRangeArgs.length > 16) {
@@ -483,9 +479,9 @@ await _.session.send(`
                 config.guessPool = guessRangeArgs.slice();
                 config.guessPoolDescribe = '"' + guessRangeArgs.join('", "') + '"';
                 if(guessRangeArgs.length === 3)
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 3);
+                    await abPlusTemp.setConfig(session, 'guessLength', 3);
                 else 
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 4);
+                    await abPlusTemp.setConfig(session, 'guessLength', 4);
                 return '猜测范围已经设置为 ' + config.guessPoolDescribe + '\n猜测长度自动设置为 ' + config.guessLength;
             }
         }
@@ -504,9 +500,9 @@ await _.session.send(`
                 config.guessPool = cutMessage.split('');
                 config.guessPoolDescribe = '"' + config.guessPool.join('", "') + '"';
                 if(cutMessage.length === 3)
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 3);
+                    await abPlusTemp.setConfig(session, 'guessLength', 3);
                 else 
-                    await abPlusTemp.setConfig(_.session, 'guessLength', 4);
+                    await abPlusTemp.setConfig(session, 'guessLength', 4);
                 return '猜测范围已经设置为 ' + config.guessPoolDescribe + '\n猜测长度自动设置为 ' + config.guessLength;
             }
         }
@@ -517,16 +513,16 @@ await _.session.send(`
 `)
 
     ctx.command('1a2b\+设置.猜测长度 <message>', { hidden: true })
-    .action(async (_,message) => {
-        const stats = await abPlusTemp.getStats(_.session);
-        const config = await abPlusTemp.getConfig(_.session);
+    .action(async ({ session },message) => {
+        const stats = await abPlusTemp.getStats(session);
+        const config = await abPlusTemp.getConfig(session);
         if(stats.isPlaying) return '在游戏中不可以更改设置~';
 
         if(message === undefined) {
             if(config.guessPool.length === 3)
-                await abPlusTemp.setConfig(_.session, 'guessLength', 3);
+                await abPlusTemp.setConfig(session, 'guessLength', 3);
             else
-            await abPlusTemp.setConfig(_.session, 'guessLength', 3);
+            await abPlusTemp.setConfig(session, 'guessLength', 3);
             return '猜测长度已重置';
         }
 
@@ -545,7 +541,7 @@ await _.session.send(`
             else if(!config.modeStupid && inputGuessLength > 16)
                 return '普通模式下猜测长度不可以超过16';
             else {
-                await abPlusTemp.setConfig(_.session, 'guessLength', inputGuessLength);
+                await abPlusTemp.setConfig(session, 'guessLength', inputGuessLength);
                 if(inputGuessLength > 6)
                     return '猜测长度已设定为 ' + inputGuessLength +' \n警告：过长的猜测长度可能会导致非常难找到正确答案';
                 else
@@ -558,7 +554,7 @@ await _.session.send(`
             else if(!config.modeStupid && inputGuessLength > 16)
                 return '普通模式下猜测长度不可以超过16';
             else {
-                await abPlusTemp.setConfig(_.session, 'guessLength', inputGuessLength);
+                await abPlusTemp.setConfig(session, 'guessLength', inputGuessLength);
                 if(inputGuessLength > 6)
                     return '猜测范围已设定为 ' + inputGuessLength +' \n警告：过长的猜测长度可能会导致非常难找到正确答案';
                 else
@@ -573,16 +569,16 @@ await _.session.send(`
 
     ctx.command('1a2b\+设置.C模式', { hidden: true })
     .alias('.C')
-    .action(async (_,message) => {
-        const stats = await abPlusTemp.getStats(_.session);
-        const config = await abPlusTemp.getConfig(_.session);
+    .action(async ({ session },message) => {
+        const stats = await abPlusTemp.getStats(session);
+        const config = await abPlusTemp.getConfig(session);
         if(stats.isPlaying) return '在游戏中不可以更改设置~';
         if(config.modeC) {
-            await abPlusTemp.setConfig(_.session,'modeC', false);
+            await abPlusTemp.setConfig(session,'modeC', false);
             return 'C模式已关闭';
         }
         else {
-            await abPlusTemp.setConfig(_.session,'modeC', true);
+            await abPlusTemp.setConfig(session,'modeC', true);
             return `
 C模式已开启
 再次发送本指令可以关闭
@@ -607,22 +603,22 @@ C前的数字代表存在，但位置在正确位置右方的字符数目
 `)
 
     ctx.command('1a2b\+设置.重复模式', { hidden: true })
-    .action(async (_,message) => {
-        const stats = await abPlusTemp.getStats(_.session);
-        const config = await abPlusTemp.getConfig(_.session);
+    .action(async ({ session },message) => {
+        const stats = await abPlusTemp.getStats(session);
+        const config = await abPlusTemp.getConfig(session);
         if(stats.isPlaying) return '在游戏中不可以更改设置~';
 
         if(config.modeDuplicate) {
-            await abPlusTemp.reSetConfig(_.session, 'guessPool');
-            await abPlusTemp.reSetConfig(_.session, 'guessPoolDescribe');
-            await abPlusTemp.reSetConfig(_.session, 'guessLength');
-            await abPlusTemp.setConfig(_.session, 'modeDuplicate', false);
+            await abPlusTemp.reSetConfig(session, 'guessPool');
+            await abPlusTemp.reSetConfig(session, 'guessPoolDescribe');
+            await abPlusTemp.reSetConfig(session, 'guessLength');
+            await abPlusTemp.setConfig(session, 'modeDuplicate', false);
             return '重复模式已关闭，猜测范围与长度已刷新';
         }
         else {
             config.guessPool = ['0', '1', '2', '3', '4', '5'];
             config.guessPoolDescribe = '0~5';
-            await abPlusTemp.setConfig(_.session,'modeDuplicate', true);
+            await abPlusTemp.setConfig(session,'modeDuplicate', true);
             return `
 重复模式已开启
 再次发送本指令可以关闭
@@ -641,20 +637,20 @@ C前的数字代表存在，但位置在正确位置右方的字符数目
 `)
 
     ctx.command('1a2b\+设置.愚人模式', { hidden: true })
-    .action(async (_,message) => {
-        const stats = await abPlusTemp.getStats(_.session);
-        const config = await abPlusTemp.getConfig(_.session);
+    .action(async ({ session },message) => {
+        const stats = await abPlusTemp.getStats(session);
+        const config = await abPlusTemp.getConfig(session);
         if(stats.isPlaying) return '在游戏中不可以更改设置~';
 
         if(config.modeStupid) {
-            await abPlusTemp.reSetConfig(_.session, 'guessPool');
-            await abPlusTemp.reSetConfig(_.session, 'guessPoolDescribe');
-            await abPlusTemp.reSetConfig(_.session, 'guessLength');
-            await abPlusTemp.setConfig(_.session, 'modeStupid', false);
+            await abPlusTemp.reSetConfig(session, 'guessPool');
+            await abPlusTemp.reSetConfig(session, 'guessPoolDescribe');
+            await abPlusTemp.reSetConfig(session, 'guessLength');
+            await abPlusTemp.setConfig(session, 'modeStupid', false);
             return '愚人模式已关闭，猜测范围与长度已刷新';
         }
         else {
-            await abPlusTemp.setConfig(_.session,'modeStupid', true);
+            await abPlusTemp.setConfig(session,'modeStupid', true);
             return `
 愚人模式已开启~
 再次发送本指令可以关闭
@@ -676,35 +672,35 @@ help 1a2b+设置.愚人模式
 `)
 
     ctx.command('1a2b\+设置.重置以上设置', { hidden: true })
-    .action(async (_,message) => {
-        await abPlusTemp.refreshConfig(_.session);
+    .action(async ({ session },message) => {
+        await abPlusTemp.refreshConfig(session);
     })
     .usage('重设猜测范围、猜测长度与所有模式')
 
     ctx.command('1a2b\+设置.设定昵称', { hidden: true })
-    .action(async (_,message) => {
+    .action(async ({ session },message) => {
         if(!message) 
             return '昵称不能为空';
         else
-            return '已设定昵称为：' + await abPlusUserData.setName(_.session,message);
+            return '已设定昵称为：' + await abPlusUserData.setName(session,message);
     })
     .usage('设定你显示在排行榜上的昵称')
 
     ctx.command('1a2b\+设置.查看群聊id', { hidden: true })
-    .action(async (_,message) => {
-        return encodeURIComponent(_.session.channelId);
+    .action(async ({ session },message) => {
+        return encodeURIComponent(session.channelId);
     })
 
     ctx.command('1a2b\+设置.查看个人id', { hidden: true })
-    .action(async (_,message) => {
-        return encodeURIComponent(_.session.event.user.id);
+    .action(async ({ session },message) => {
+        return encodeURIComponent(session.event.user.id);
     })
 
 
     ctx.command('1a2b\+猜 <message:text>', { hidden: true })
     .alias('加猜','abpg')
-    .action(async (_, message) => {
-        const stats = await abPlusTemp.getStats(_.session);
+    .action(async ({ session }, message) => {
+        const stats = await abPlusTemp.getStats(session);
         if (message === undefined) return '你猜啥？';
         if (!stats.isPlaying) return '还没开始呢！';
 
@@ -717,11 +713,11 @@ help 1a2b+设置.愚人模式
             cutMessage = message.slice();
         }
 
-        let checkResult = await abPlusCheck(_.session, cutMessage);
+        let checkResult = await abPlusCheck(session, cutMessage);
         if(!(checkResult).checkResult) return checkResult.reason;
 
-        await abPlusUserData.increaseUserData(_.session, 'guessCount');
-        return await abPlusGuess(_.session, cutMessage);
+        await abPlusUserData.increaseUserData(session, 'guessCount');
+        return await abPlusGuess(session, cutMessage);
     })
     .usage(`猜~就是~猜呗...还能是啥
 不过，群聊时发送的消息如果符合可能出现的答案的话也会被匹配
