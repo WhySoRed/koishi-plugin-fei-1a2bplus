@@ -1,5 +1,5 @@
 "use strict";
-import { Context, Schema, h, Session } from 'koishi';
+import { Context, Schema, h } from 'koishi';
 import {} from '@koishijs/plugin-help';
 
 export const name = 'fei-1a2b-test';
