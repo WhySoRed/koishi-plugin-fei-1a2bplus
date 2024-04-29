@@ -743,7 +743,7 @@ help 1a2b+设置.愚人模式
                 else session.send(checkResult.reason);
             }
         }
-        else next();
+        else return next();
     })
     //对猜测输入进行检测
     async function abPlusCheck(session:any,message:string){
